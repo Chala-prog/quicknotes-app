@@ -13,7 +13,13 @@ QuickNotes is a lightweight, responsive single-page web application that allows 
 ## How to Run Locally
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/Chala-prog/quicknotes-app.git](https://github.com/Chala-prog/quicknotes-app.git)## What I Learned
+   git clone [https://github.com/Chala-prog/quicknotes-app.git](https://github.com/Chala-prog/quicknotes-app.git)
+
+
+Open index.html directly in any web browser (or double-click index.html from File Explorer).
+
+
+## What I Learned
 - **The Render Pattern**: Decoupling application data (`notes` array state) from DOM rendering ensures predictable, bug-free UI updates whenever data changes.
 - **XSS Prevention**: Safely inserting user-generated text using `textContent` instead of `innerHTML` eliminates Cross-Site Scripting vulnerabilities.
 - **State Synchronization & Persistence**: Serializing JavaScript objects with `JSON.stringify` and `JSON.parse` enables client-side data storage across sessions using `localStorage`.
