@@ -10,42 +10,43 @@
 <body>
   <header>
     <h1>QuickNotes</h1>
-    <p>Your simple, fast browser-based note taking application</p>
+    <p>Capture your thoughts instantly</p>
   </header>
 
   <main>
-    <section class="card">
-      <h2>Add a Note</h2>
+    <section>
+      <h2>Add a note</h2>
       <form id="note-form">
-        <label for="note-input" class="sr-only">Note Content:</label>
-        <input type="text" id="note-input" placeholder="Type your note here..." />
+        <div class="form-group">
+          <label for="note-input">Note Content</label>
+          <input type="text" id="note-input" placeholder="Type your note here...">
+        </div>
         
-        <label for="note-category" class="sr-only">Category:</label>
-        <select id="note-category">
-          <option value="Personal">Personal</option>
-          <option value="Work">Work</option>
-          <option value="Study">Study</option>
-        </select>
-        
+        <div class="form-group">
+          <label for="note-category">Category</label>
+          <select id="note-category">
+            <option value="Personal">Personal</option>
+            <option value="Work">Work</option>
+            <option value="Study">Study</option>
+          </select>
+        </div>
+
         <button type="submit">Add Note</button>
       </form>
       <p id="error-message"></p>
     </section>
 
-    <section class="card">
-      <h2>Your Notes</h2>
-      <div class="search-container">
-        <label for="search-input" class="sr-only">Search notes:</label>
-        <input type="text" id="search-input" placeholder="Search notes..." />
-        <button id="clear-all-btn" type="button">Clear All</button>
-      </div>
+    <section>
+      <h2>Your notes</h2>
+      <input type="text" id="search-input" placeholder="Search notes...">
       <p id="note-count">You have no notes yet.</p>
+      <button id="clear-all-btn" style="display: none;">Clear All Notes</button>
       <ul id="notes-list"></ul>
     </section>
   </main>
 
   <footer>
-    <p>&copy; 2026 QuickNotes App. Built with Vanilla JS.</p>
+    <p>&copy; 2026 QuickNotes App. Built with HTML, CSS, and JS.</p>
   </footer>
 </body>
 </html>
