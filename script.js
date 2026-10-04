@@ -1,23 +1,40 @@
-// DOM Selection using querySelector
+// Query Selectors
 const noteForm = document.querySelector("#note-form");
 const noteInput = document.querySelector("#note-input");
 const noteCategory = document.querySelector("#note-category");
-const errorMessage = document.querySelector("#error-message");
 const searchInput = document.querySelector("#search-input");
-const noteCount = document.querySelector("#note-count");
 const notesList = document.querySelector("#notes-list");
-const clearAllBtn = document.querySelector("#clear-all-btn");
+const noteCount = document.querySelector("#note-count");
+const errorMessage = document.querySelector("#error-message");
 
-// State Initialization from localStorage
-let notes = JSON.parse(localStorage.getItem("notes")) || [];
+// Main State: Array of note objects
+let notes = [];
 
-// Save to LocalStorage helper
-function saveNotes() {
-  localStorage.setItem("notes", JSON.stringify(notes));
+/**
+ * Task 5 — Persistence: Load notes from localStorage
+ */
+function loadNotes() {
+  const storedNotes = localStorage.getItem("quicknotes_data");
+  if (storedNotes) {
+    try {
+      notes = JSON.parse(storedNotes);
+    } catch (e) {
+      notes = [];
+    }
+  }
 }
 
-// Update Note Count Message
-function updateCount(count) {
+/**
+ * Task 5 — Persistence: Save notes array to localStorage
+ */
+function saveNotes() {
+  localStorage.setItem("quicknotes_data", JSON.stringify(notes));
+}
+
+/**
+ * Task 4 — Update Count Paragraph
+ */
+function updateCountMessage(count) {
   if (count === 0) {
     noteCount.textContent = "You have no notes yet.";
   } else if (count === 1) {
@@ -27,59 +44,61 @@ function updateCount(count) {
   }
 }
 
-// Main Render Function
+/**
+ * Task 3 & 5 — Render Function (Safely creates DOM elements using textContent)
+ */
 function render() {
-  notesList.innerHTML = "";
+  notesList.textContent = ""; // Clear list container safely
   const query = searchInput.value.trim().toLowerCase();
-  
-  const filteredNotes = notes.filter(note => 
+
+  // Task 5 — Filter notes by search keyword
+  const filteredNotes = notes.filter((note) =>
     note.text.toLowerCase().includes(query)
   );
 
-  updateCount(notes.length);
+  updateCountMessage(filteredNotes.length);
 
-  // Toggle Clear All button visibility
-  if (notes.length > 0) {
-    clearAllBtn.style.display = "inline-block";
-  } else {
-    clearAllBtn.style.display = "none";
-  }
-
-  if (filteredNotes.length === 0 && notes.length > 0) {
-    const emptyMsg = document.createElement("li");
-    emptyMsg.textContent = "No notes match your search.";
-    emptyMsg.style.textAlign = "center";
-    emptyMsg.style.color = "#777";
-    notesList.appendChild(emptyMsg);
+  // Task 5 — Show empty search result message if query yields no match
+  if (filteredNotes.length === 0 && query !== "") {
+    const emptyLi = document.createElement("li");
+    emptyLi.textContent = "No notes match your search.";
+    emptyLi.style.color = "#64748b";
+    emptyLi.style.fontStyle = "italic";
+    notesList.appendChild(emptyLi);
     return;
   }
 
-  filteredNotes.forEach(note => {
+  // Render Note Cards
+  filteredNotes.forEach((note) => {
     const li = document.createElement("li");
-    li.className = `note-card category-${note.category.toLowerCase()}`;
+    // Task 2 — Category CSS class binding (category-personal, category-work, category-study)
+    const categoryClass = `category-${note.category.toLowerCase()}`;
+    li.className = `note-card ${categoryClass}`;
 
     const contentDiv = document.createElement("div");
     contentDiv.className = "note-content";
 
     const textP = document.createElement("p");
-    textP.textContent = note.text; // Safe text handling preventing XSS
+    textP.className = "note-text";
+    textP.textContent = note.text; // Prevents XSS
 
     const metaDiv = document.createElement("div");
     metaDiv.className = "note-meta";
 
-    const badge = document.createElement("span");
-    badge.className = "category-badge";
-    badge.textContent = note.category;
+    const badgeSpan = document.createElement("span");
+    badgeSpan.className = "category-badge";
+    badgeSpan.textContent = note.category;
 
-    const dateSpan = document.createElement("span");
-    dateSpan.textContent = note.createdAt;
+    const timeSpan = document.createElement("span");
+    timeSpan.textContent = note.createdAt;
 
-    metaDiv.appendChild(badge);
-    metaDiv.appendChild(dateSpan);
+    metaDiv.appendChild(badgeSpan);
+    metaDiv.appendChild(timeSpan);
 
     contentDiv.appendChild(textP);
     contentDiv.appendChild(metaDiv);
 
+    // Task 4 — Delete Button
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "Delete";
@@ -90,15 +109,29 @@ function render() {
 
     notesList.appendChild(li);
   });
+
+  // Optional Bonus: Render "Clear All" button if notes exist
+  if (notes.length > 0) {
+    const clearAllBtn = document.createElement("button");
+    clearAllBtn.textContent = "Clear All Notes";
+    clearAllBtn.className = "clear-all-btn";
+    clearAllBtn.addEventListener("click", clearAllNotes);
+    notesList.appendChild(clearAllBtn);
+  }
 }
 
-// Add Note Event Handler
-noteForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const text = noteInput.value.trim();
+/**
+ * Task 3 & 4 — Add Note with Validation
+ */
+function addNote(event) {
+  event.preventDefault(); // Stop page refresh
+  errorMessage.textContent = ""; // Reset error display
 
-  // Validation
-  if (!text) {
+  const text = noteInput.value.trim();
+  const category = noteCategory.value;
+
+  // Task 4 — Validation Checks
+  if (text === "") {
     errorMessage.textContent = "Please type a note first.";
     return;
   }
@@ -108,39 +141,51 @@ noteForm.addEventListener("submit", (e) => {
     return;
   }
 
-  errorMessage.textContent = "";
-
+  // Task 3 — Create Note Object
   const newNote = {
-    id: Date.now(),
+    id: Date.now().toString(),
     text: text,
-    category: noteCategory.value,
-    createdAt: new Date().toLocaleString()
+    category: category,
+    createdAt: new Date().toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    })
   };
 
-  notes.push(newNote);
+  notes.unshift(newNote); // Prepend to notes array
   saveNotes();
-  noteInput.value = "";
   render();
-});
 
-// Delete Note Helper
+  noteInput.value = ""; // Clear input field
+  noteInput.focus();
+}
+
+/**
+ * Task 4 — Delete single note
+ */
 function deleteNote(id) {
-  notes = notes.filter(note => note.id !== id);
+  notes = notes.filter((note) => note.id !== id);
   saveNotes();
   render();
 }
 
-// Realtime Search Event Handler
-searchInput.addEventListener("input", render);
-
-// Optional Bonus: Clear All Notes
-clearAllBtn.addEventListener("click", () => {
+/**
+ * Bonus (+5 points) — Clear All Notes with confirmation
+ */
+function clearAllNotes() {
   if (confirm("Delete all notes?")) {
     notes = [];
     saveNotes();
     render();
   }
-});
+}
 
-// Initial Render on Load
+// Event Listeners
+noteForm.addEventListener("submit", addNote);
+searchInput.addEventListener("input", render);
+
+// Page Initialization
+loadNotes();
 render();
